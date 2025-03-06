@@ -1,10 +1,12 @@
 package com.xiyun.saltedfishnetdish.pojo;
 
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor
+@Data
 public class Result<T> {
     private int code;
     private String msg;

@@ -9,9 +9,9 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Users {
+public class User {
 
-    private String userId;//系统内唯一用户标识
+    private Integer userId;//系统内唯一用户标识
 
     private String username;//登录用户名（唯一）
 
