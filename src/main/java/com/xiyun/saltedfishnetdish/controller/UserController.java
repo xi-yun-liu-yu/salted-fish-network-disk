@@ -5,9 +5,10 @@ import com.xiyun.saltedfishnetdish.pojo.User;
 import com.xiyun.saltedfishnetdish.service.UserService;
 import com.xiyun.saltedfishnetdish.utils.JwtUtil;
 import com.xiyun.saltedfishnetdish.utils.Md5Util;
+import com.xiyun.saltedfishnetdish.utils.ThreadLocalUtil;
+import org.hibernate.validator.constraints.URL;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,40 +20,57 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/api/users/register")
-    private Result register(String username, String password) {
-        //查询用户
-        User u = userService.findByUserName(username);
+    @PostMapping({"/api/users/register/{username}/{password}"})
+    private Result register(@PathVariable String username, @PathVariable String password) {
+        User u = this.userService.findByUserName(username);
         if (u == null) {
-            //注册
-            userService.register(username,password);
+            this.userService.register(username, password);
             return Result.success();
-        }else {
-            //用户名被占用
+        } else {
             return Result.error("用户名已被占用");
         }
-
     }
 
-    @PostMapping("/api/users/login")
-    private Result<String> login(String username, String password) {
-        //查询用户
-        User u = userService.findByUserName(username);
+    @GetMapping({"/api/users/login/{username}/{password}"})
+    private Result<String> login(@PathVariable String username, @PathVariable String password) {
+        System.out.println(username);
+        User u = this.userService.findByUserName(username);
         if (u == null) {
-            //让用户去注册
             return Result.error("用户名不存在");
-        }else {
-            //用户存在
-            if (u.getPasswordHash().equals(Md5Util.getMD5String(password))) {
-                Map<String,Object> claims = new HashMap<>();
-                claims.put("id",u.getUserId());
-                claims.put("username",u.getUsername());
-                String token = JwtUtil.genToken(claims);
-                return Result.success(token);
-            }
+        } else if (u.getPasswordHash().equals(Md5Util.getMD5String(password))) {
+            Map<String, Object> claims = new HashMap();
+            claims.put("id", u.getUserId());
+            claims.put("username", u.getUsername());
+            String token = JwtUtil.genToken(claims);
+            return Result.success(token);
+        } else {
             return Result.error("密码错误");
-
         }
+    }
 
+    @GetMapping({"/api/users/info"})
+    private Result<User> userInfo() {
+        Map<String, Object> map = (Map) ThreadLocalUtil.get();
+        String username = (String)map.get("username");
+        User user = this.userService.findByUserName(username);
+        return Result.success(user);
+    }
+
+    @PutMapping({"/api/users/update"})
+    public Result update(@RequestBody User user) {
+        this.userService.update(user);
+        return Result.success("已更新用户信息");
+    }
+
+    @PatchMapping({"/api/users/avatar"})
+    public Result updateAvatar(@RequestParam @URL String avatar) {
+        this.userService.updateAvatar(avatar);
+        return Result.success();
+    }
+
+    @PutMapping({"/api/users/password/{password}"})
+    public Result updatePassword(@PathVariable String password) {
+        this.userService.password(password);
+        return Result.success("密码重置成功！");
     }
 }

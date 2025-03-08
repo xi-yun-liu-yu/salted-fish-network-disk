@@ -1,5 +1,6 @@
 package com.xiyun.saltedfishnetdish.pojo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,7 @@ public class User {
     private Integer userId;//系统内唯一用户标识
 
     private String username;//登录用户名（唯一）
-
+    @JsonIgnore
     private String passwordHash;//BCrypt加密后的密码
 
     private String email;//绑定邮箱（用于找回密码）
@@ -26,5 +27,9 @@ public class User {
     private String userPermId;//用户权限id
 
     private LocalDateTime createdAt;//账户创建时间
+
+    private String nickname;
+
+    private String avatar;
 
 }

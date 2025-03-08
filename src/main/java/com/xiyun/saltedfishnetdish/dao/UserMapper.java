@@ -4,6 +4,7 @@ import com.xiyun.saltedfishnetdish.pojo.User;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 @Mapper
 public interface UserMapper {
@@ -17,6 +18,13 @@ public interface UserMapper {
     @Select("select * from user where username = #{username}")
     User findByUserName(String username);
     //获取用户元数据
+    @Update({"UPDATE user set email=#{email}, nickname=#{nickname} where user_id = #{userId} "})
+    void update(User user);
 
+    @Update({"update user set password_hash=#{s} where user_id = #{userId}"})
+    void updatePassword(Integer userId, String s);
+
+    @Update({"update user set avatar_url = #{avatar} where user_id = #{userId}"})
+    void updateAvatar(Integer userId, String avatar);
 
 }
