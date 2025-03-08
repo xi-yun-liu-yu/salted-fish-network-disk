@@ -19,7 +19,7 @@ public class UserServiceImpl implements UserService {
     public User findByUserName(String username) {
         return userMapper.findByUserName(username);
     }
-
+    //登录
     @Override
     public void register(String username, String password) {
         //加密
@@ -27,11 +27,12 @@ public class UserServiceImpl implements UserService {
         //添加
         userMapper.addUser(username,s);
     }
-
+    //更新用户信息
     @Override
     public void update(User user) {
         this.userMapper.update(user);
     }
+    //更新用户密码
     @Override
     public void password(String password) {
         Map<String, Object> map = (Map) ThreadLocalUtil.get();
@@ -39,6 +40,7 @@ public class UserServiceImpl implements UserService {
         String s = Md5Util.getMD5String(password);
         this.userMapper.updatePassword(userId, s);
     }
+    //更新用户头像
     @Override
     public void updateAvatar(String avatar) {
         Map<String, Object> map = (Map)ThreadLocalUtil.get();

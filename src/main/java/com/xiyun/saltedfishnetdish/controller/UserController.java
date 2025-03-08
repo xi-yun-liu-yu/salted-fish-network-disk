@@ -19,7 +19,7 @@ import java.util.UUID;
 public class UserController {
     @Autowired
     private UserService userService;
-
+    //注册
     @PostMapping({"/api/users/register/{username}/{password}"})
     private Result register(@PathVariable String username, @PathVariable String password) {
         User u = this.userService.findByUserName(username);
@@ -30,7 +30,7 @@ public class UserController {
             return Result.error("用户名已被占用");
         }
     }
-
+    //登录
     @GetMapping({"/api/users/login/{username}/{password}"})
     private Result<String> login(@PathVariable String username, @PathVariable String password) {
         System.out.println(username);
@@ -47,7 +47,7 @@ public class UserController {
             return Result.error("密码错误");
         }
     }
-
+    //查询用户信息
     @GetMapping({"/api/users/info"})
     private Result<User> userInfo() {
         Map<String, Object> map = (Map) ThreadLocalUtil.get();
@@ -55,19 +55,19 @@ public class UserController {
         User user = this.userService.findByUserName(username);
         return Result.success(user);
     }
-
+    //更新用户信息
     @PutMapping({"/api/users/update"})
     public Result update(@RequestBody User user) {
         this.userService.update(user);
         return Result.success("已更新用户信息");
     }
-
+    //更新用户头像
     @PatchMapping({"/api/users/avatar"})
     public Result updateAvatar(@RequestParam @URL String avatar) {
         this.userService.updateAvatar(avatar);
         return Result.success();
     }
-
+    //更新用户密码
     @PutMapping({"/api/users/password/{password}"})
     public Result updatePassword(@PathVariable String password) {
         this.userService.password(password);

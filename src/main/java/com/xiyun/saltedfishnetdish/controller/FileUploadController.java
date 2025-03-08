@@ -10,12 +10,11 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 public class FileUploadController {
 
-
+    //上传图片到服务器
     @PostMapping({"/api/file/upload"})
     public Result<String> upload(MultipartFile file) throws Exception {
         String originalFilename = file.getOriginalFilename();
-        String var10000 = UUID.randomUUID().toString();
-        String filename = var10000 + originalFilename.substring(originalFilename.lastIndexOf("."));
+        String filename = UUID.randomUUID().toString() + originalFilename.substring(originalFilename.lastIndexOf("."));
         String url = AliOssUtil.uploadFile(filename, file.getInputStream());
         return Result.success(url);
     }

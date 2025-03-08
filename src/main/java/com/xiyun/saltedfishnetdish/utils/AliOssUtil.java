@@ -23,15 +23,13 @@ public class AliOssUtil {
 
     public static String uploadFile(String objectName, InputStream in) throws Exception {
         EnvironmentVariableCredentialsProvider credentialsProvider = CredentialsProviderFactory.newEnvironmentVariableCredentialsProvider();
-        OSS ossClient = (new OSSClientBuilder()).build("https://oss-cn-chengdu.aliyuncs.com", credentialsProvider);
+        OSS ossClient = (new OSSClientBuilder()).build(ENDPOINT, credentialsProvider);
         String url = "";
 
         try {
-            String content = "Hello OSS，你好世界";
-            PutObjectRequest putObjectRequest = new PutObjectRequest("sfnd", objectName, in);
+            PutObjectRequest putObjectRequest = new PutObjectRequest(BUCKET_NAME, objectName, in);
             ossClient.putObject(putObjectRequest);
-            String var10000 = "https://oss-cn-chengdu.aliyuncs.com".substring("https://oss-cn-chengdu.aliyuncs.com".lastIndexOf("/") + 1);
-            url = "https://sfnd." + var10000 + "/" + objectName;
+            url = "https://sfnd." + ENDPOINT + "/" + objectName;
         } catch (OSSException oe) {
             System.out.println("Caught an OSSException, which means your request made it to OSS, but was rejected with an error response for some reason.");
             System.out.println("Error Message:" + oe.getErrorMessage());
