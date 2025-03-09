@@ -13,4 +13,6 @@ public interface UserService {
     void password(String password);
     //更新用户头像
     void updateAvatar(String avatar);
+    //更新用户权限
+    void updatePremId(String premId);
 }

@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
     //更新用户密码
     @Override
     public void password(String password) {
-        Map<String, Object> map = (Map) ThreadLocalUtil.get();
+        Map<String, Object> map = ThreadLocalUtil.get();
         Integer userId = (Integer)map.get("userId");
         String s = Md5Util.getMD5String(password);
         this.userMapper.updatePassword(userId, s);
@@ -43,8 +43,15 @@ public class UserServiceImpl implements UserService {
     //更新用户头像
     @Override
     public void updateAvatar(String avatar) {
-        Map<String, Object> map = (Map)ThreadLocalUtil.get();
+        Map<String, Object> map = ThreadLocalUtil.get();
         Integer userId = (Integer)map.get("userId");
         this.userMapper.updateAvatar(userId, avatar);
+    }
+    //更新用户权限
+    @Override
+    public void updatePremId(String PremId) {
+        Map<String, Object> map = ThreadLocalUtil.get();
+        String userId = (String) map.get("userId");
+        this.userMapper.updatePremId(userId, PremId);
     }
 }

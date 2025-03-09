@@ -12,8 +12,6 @@ public interface UserMapper {
     @Insert("insert into user(username, password_hash, created_at) " +
             " values(#{username},#{password},now()) ")
     void addUser(String username, String password);
-    //验证用户身份（登录用）
-    boolean isUSer(String username,String password);
     //根据用户名查询用户
     @Select("select * from user where username = #{username}")
     User findByUserName(String username);
@@ -26,5 +24,7 @@ public interface UserMapper {
     //更新用户头像
     @Update({"update user set avatar_url = #{avatar} where user_id = #{userId}"})
     void updateAvatar(Integer userId, String avatar);
-
+    //更新用户权限
+    @Update({"update user set user_perm_id = #{premId} where user_id = #{userId}"})
+    void updatePremId(String userId, String premId);
 }

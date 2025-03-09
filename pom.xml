@@ -102,7 +102,11 @@
         </dependency>
         <!--以上阿里云OSS的SDK依赖-->
 
-
+        <!--redis依赖-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
     </dependencies>
 
 
