@@ -26,5 +26,8 @@ public interface UserMapper {
     void updateAvatar(Integer userId, String avatar);
     //更新用户权限
     @Update({"update user set user_perm_id = #{premId} where user_id = #{userId}"})
-    void updatePremId(String userId, String premId);
+    void updatePremId(Integer userId, Integer premId);
+    //更新用户存储配额
+    @Update({"update user set storage_limit = #{value} where user_id = #{userId}"})
+    void updateStorageLimit(Integer userId, long value);
 }

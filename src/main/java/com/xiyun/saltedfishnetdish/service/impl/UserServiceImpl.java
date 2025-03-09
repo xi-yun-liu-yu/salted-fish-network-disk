@@ -49,9 +49,16 @@ public class UserServiceImpl implements UserService {
     }
     //更新用户权限
     @Override
-    public void updatePremId(String PremId) {
+    public void updatePremId(Integer PremId) {
         Map<String, Object> map = ThreadLocalUtil.get();
-        String userId = (String) map.get("userId");
+        Integer userId = (Integer) map.get("userId");
         this.userMapper.updatePremId(userId, PremId);
+    }
+
+    @Override
+    public void updateStorageLimit(long value) {
+        Map<String, Object> map = ThreadLocalUtil.get();
+        Integer userId = (Integer) map.get("userId");
+        this.userMapper.updateStorageLimit(userId, value);
     }
 }

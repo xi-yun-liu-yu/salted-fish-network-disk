@@ -43,11 +43,13 @@ public class UserController {
             return Result.error("用户名不存在");
         } else if (u.getPasswordHash().equals(Md5Util.getMD5String(password))) {
             Map<String, Object> claims = new HashMap();
-            claims.put("id", u.getUserId());
+            claims.put("userId", u.getUserId());
             claims.put("username", u.getUsername());
             claims.put("userPermId", u.getUserPermId());
             String token = JwtUtil.genToken(claims);
             stringRedisTemplate.opsForValue().set(token, token,12, TimeUnit.HOURS);
+            stringRedisTemplate.opsForValue().set("userStorageLimit", String.valueOf(u.getStorageLimit()),12, TimeUnit.HOURS);
+            stringRedisTemplate.opsForValue().set("userStorage", String.valueOf(u.getUsedStorage()),12, TimeUnit.HOURS);
             return Result.success(token);
         } else {
             return Result.error("密码错误");
@@ -82,16 +84,47 @@ public class UserController {
         if (u.getPasswordHash().equals(Md5Util.getMD5String(password))) {
             stringRedisTemplate.opsForValue().getOperations().delete(token);
             userService.password(newPassword);
+            System.out.println(newPassword);
             return Result.success("密码重置成功！");
         }
         return Result.error("原密码错误");
 
     }
     //更新用户权限等级
-    @PutMapping({"/api/admin/users/prem"})
-    public Result updatePremId(@RequestBody String premId) {
+    @PutMapping({"/api/admin/users/prem/{premId}"})
+    public Result updatePremId(@PathVariable Integer premId) {
         userService.updatePremId(premId);
         return Result.success("用户权限已更新");
     }
     //调整存储配额
+    @PutMapping({"/api/admin/users/storage/{operation}/{value}"})
+    public Result setStorage(@PathVariable String operation,@PathVariable Long value){
+        String userStorage = stringRedisTemplate.opsForValue().get("userStorage");
+        String userStorageLimit = stringRedisTemplate.opsForValue().get("userStorageLimit");
+        String storage;
+        if (userStorage != null && userStorageLimit != null) {
+            switch (operation) {
+                case "INCREASE":
+                    storage = String.valueOf(Long.parseLong(userStorageLimit) + value);
+                    break;
+                case "DECREASE":
+                    if (Long.parseLong(userStorageLimit) - value >= Long.parseLong(userStorage)) {
+                        storage = String.valueOf(Long.parseLong(userStorageLimit) - value);
+                    }else {
+                        return Result.error("未使用的空间不足");
+                    }
+                    break;
+                case "SET":
+                    storage = String.valueOf(value);
+                    break;
+                default:
+                    return Result.error("非法操作！！！");
+            }
+            userService.updateStorageLimit(Long.parseLong(storage));
+            stringRedisTemplate.opsForValue().set("userStorageLimit", storage);
+            return Result.success("内存上限调整成功！");
+        }
+        return Result.error("用户信息缺失，请重新登录或联系管理员。");
+
+    }
 }

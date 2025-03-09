@@ -24,7 +24,7 @@ public class User {
 
     private Long usedStorage;//已用存储空间（动态更新）
 
-    private String userPermId;//用户权限id
+    private Integer userPermId;//用户权限id
 
     private LocalDateTime createdAt;//账户创建时间
 

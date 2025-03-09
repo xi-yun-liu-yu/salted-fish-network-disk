@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 public class FileUploadController {
 
-    //上传图片到服务器
+    //上传文件到服务器
     @PostMapping({"/api/file/upload"})
     public Result<String> upload(MultipartFile file) throws Exception {
         String originalFilename = file.getOriginalFilename();
@@ -18,5 +18,6 @@ public class FileUploadController {
         String url = AliOssUtil.uploadFile(filename, file.getInputStream());
         return Result.success(url);
     }
+
 }
 
