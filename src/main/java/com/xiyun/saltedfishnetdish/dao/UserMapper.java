@@ -30,4 +30,7 @@ public interface UserMapper {
     //更新用户存储配额
     @Update({"update user set storage_limit = #{value} where user_id = #{userId}"})
     void updateStorageLimit(Integer userId, long value);
+    //更新用户存储用量
+    @Update({"update user set used_storage = #{value} where user_id = #{userId}"})
+    void updateStorage(Integer userId, long value);
 }

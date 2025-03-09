@@ -6,9 +6,6 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import java.util.Date;
 import java.util.Map;
 
-
-
-
 public class JwtUtil {
 
     private static final String KEY = "xiyun";

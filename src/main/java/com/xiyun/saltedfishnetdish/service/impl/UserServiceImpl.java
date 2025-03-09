@@ -61,4 +61,11 @@ public class UserServiceImpl implements UserService {
         Integer userId = (Integer) map.get("userId");
         this.userMapper.updateStorageLimit(userId, value);
     }
+
+    @Override
+    public void userStorage(long value) {
+        Map<String, Object> map = ThreadLocalUtil.get();
+        Integer userId = (Integer) map.get("userId");
+        this.userMapper.updateStorage(userId, value);
+    }
 }

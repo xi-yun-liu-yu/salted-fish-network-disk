@@ -15,6 +15,8 @@ public interface UserService {
     void updateAvatar(String avatar);
     //更新用户权限
     void updatePremId(Integer premId);
-
+    //更新存储上限
     void updateStorageLimit(long value);
+    //更新存储用量
+    void userStorage(long value);
 }

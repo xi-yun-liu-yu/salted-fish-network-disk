@@ -6,6 +6,8 @@ spring:
     redis:
       host: localhost
       port: 6379
+    mongodb:
+      uri: mongodb://localhost:27017/sfnd
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
