@@ -129,8 +129,8 @@ public class UserController {
     }
 
     //更新已用存储空间
-    @PutMapping({"/api/internal/users/storage/{operation}/{value}"})
-    public Result setStorage(@PathVariable String operation,@PathVariable Long value){
+//    @PutMapping({"/api/internal/users/storage/{operation}/{value}"})
+    public Result setStorage( String operation, Long value){
         String userStorage = stringRedisTemplate.opsForValue().get("userStorage");
         String userStorageLimit = stringRedisTemplate.opsForValue().get("userStorageLimit");
         String storage;
