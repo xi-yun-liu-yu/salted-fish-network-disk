@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
+import javax.swing.*;
 import java.util.List;
 
 @Service
@@ -75,6 +76,18 @@ public class FileNodeServiceImpl implements FileNodeService {
      */
     public FileNode updateNodeName(String id, String newName) {
         Update update = new Update().set("name", newName);
+        return mongoDBUtil.updateById(id, update, FileNode.class, COLLECTION_NAME);
+    }
+
+    /**
+     * 更新节点名称
+     *
+     * @param id       节点ID
+     * @param children  新子节点
+     * @return 更新后的节点
+     */
+    public FileNode updateNodeChildren(String id, List children) {
+        Update update = new Update().set("children", children);
         return mongoDBUtil.updateById(id, update, FileNode.class, COLLECTION_NAME);
     }
 

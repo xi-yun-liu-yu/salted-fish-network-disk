@@ -17,3 +17,6 @@ spring:
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
+jwt:
+  sign:
+    secret: "hhyqbffbyqzkyyqcllhysfcqqywz" # 推荐32字节以上

@@ -19,7 +19,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public int deleteFileById(Long id) {
+    public int deleteFileById(String id) {
         return fileMapper.deleteFileById(id);
     }
 
@@ -29,7 +29,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public File selectFileById(Long id) {
+    public File selectFileById(String id) {
         return fileMapper.selectFileById(id);
     }
 
