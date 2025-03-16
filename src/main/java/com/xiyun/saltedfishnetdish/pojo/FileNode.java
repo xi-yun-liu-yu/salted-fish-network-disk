@@ -21,5 +21,5 @@ public class FileNode {
     private Long size; // 节点文件大小
     private String parentId; // 父节点ID
     private List<String> children; // 子节点ID列表
-//    private java.sql.Timestamp updatedAt;//文件更新时间
+    private java.sql.Timestamp updatedAt;//文件更新时间
 }
