@@ -68,8 +68,9 @@ public class FileUploadController {
             }
             children.add(filename);
             fileNodeService.updateNodeChildren(nodeId, children);
-            fileNodeService.addNode(new FileNode(filename,originalFilename,"file",nodeId,null));
+
             url = AliOssUtil.uploadFile(filename, file.getInputStream());
+            fileNodeService.addNode(new FileNode(filename,originalFilename,StringUtils.substringBefore(file.getContentType(), "/"),url,file.getSize(),nodeId,null));
             Map<String, Object> map = ThreadLocalUtil.get();
             String username = (String)map.get("username");
             Integer userId = (Integer)map.get("userId");
@@ -146,16 +147,21 @@ public class FileUploadController {
 
     //删除文件
     @DeleteMapping({"/api/file/deleteFile/{fileUuid}"})
-    public Result deleteFile(@PathVariable String fileUuid){
+    public Result deleteFile(@PathVariable String fileUuid) throws Exception {
         File file1 = fileService.selectFileById(fileUuid);
-        if(file1 == null){
+        if(file1 == null || file1.getFileFormat().equals( "folder")){
             return Result.error("此文件不存在");
         }
+        String parentId = fileNodeService.getNodeById(fileUuid).getParentId();
         Map<String, Object> map = ThreadLocalUtil.get();
         Integer userId = (Integer)map.get("userId");
         if (file1.getViewPermission().equals("private") && userId == file1.getCreatorId()){
             return Result.error("无操作权限");
         }
+        AliOssUtil.deleteFile(fileUuid);
+        List<String> children = fileNodeService.getNodeById(parentId).getChildren();
+        children.remove(fileUuid);
+        fileNodeService.updateNodeChildren(parentId, children);
         fileService.deleteFileById(fileUuid);
         fileNodeService.deleteNode(fileUuid);
         return Result.success("删除成功");
@@ -178,7 +184,7 @@ public class FileUploadController {
             }
             children.add(uuid);
             fileNodeService.updateNodeChildren(nodeId, children);
-            fileNodeService.addNode(new FileNode(uuid,folderName,"folder",nodeId,null));
+            fileNodeService.addNode(new FileNode(uuid,folderName,"folder",null,0L,nodeId,null));
             Map<String, Object> map = ThreadLocalUtil.get();
             String username = (String)map.get("username");
             Integer userId = (Integer)map.get("userId");
@@ -190,6 +196,16 @@ public class FileUploadController {
         }
         return Result.success("已创建" + folderName);
     }
+    @GetMapping({"/api/file/getFileNodeTree"})
+    public Result getFileNodeTree(){
+        Map<String, Object> map = ThreadLocalUtil.get();
+        Integer userId = (Integer)map.get("userId");
+        return Result.success(fileNodeService.getTree(String.valueOf(userId)));
+    }
 
+    //删除指定文件夹下的树
+    public void deleteFile(){
+
+    }
 }
 

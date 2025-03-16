@@ -1,43 +1,66 @@
 package com.xiyun.saltedfishnetdish.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.xiyun.saltedfishnetdish.pojo.FileNode;
 import com.xiyun.saltedfishnetdish.pojo.Result;
 import com.xiyun.saltedfishnetdish.pojo.User;
+import com.xiyun.saltedfishnetdish.service.FileNodeService;
 import com.xiyun.saltedfishnetdish.service.UserService;
+import com.xiyun.saltedfishnetdish.utils.AliOssUtil;
 import com.xiyun.saltedfishnetdish.utils.JwtUtil;
 import com.xiyun.saltedfishnetdish.utils.Md5Util;
 import com.xiyun.saltedfishnetdish.utils.ThreadLocalUtil;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
+import org.apache.ibatis.annotations.Param;
 import org.hibernate.validator.constraints.URL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+@Validated
 @RestController
 public class UserController {
+//    @Autowired
+//    private UserService userService;
+    private final UserService userService;
+
     @Autowired
-    private UserService userService;
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private FileNodeService fileNodeService;
     //注册
+    @Valid
     @PostMapping({"/api/users/register/{username}/{password}"})
-    private Result register(@PathVariable String username, @PathVariable String password) {
+    public Result register(@PathVariable @Pattern(regexp = "^\\S.{5,20}$") String username, @PathVariable @Pattern(regexp = "^\\S[a-zA-Z0-9]{8,32}$") String password) {
         User u = userService.findByUserName(username);
         if (u == null) {
             userService.register(username, password);
+            Integer userId = userService.findByUserName(username).getUserId();
+            fileNodeService.addNode(new FileNode(String.valueOf(userId),"root","folder",null, 0L,null,null));
             return Result.success();
         } else {
             return Result.error("用户名已被占用");
         }
     }
     //登录
+    @Valid
     @GetMapping({"/api/users/login/{username}/{password}"})
-    private Result<String> login(@PathVariable String username, @PathVariable String password) {
+    public Result<String> login(@PathVariable @Pattern(regexp = "^\\S.{4,20}$") String username, @PathVariable @Pattern(regexp = "^\\S[a-zA-Z0-9]{7,32}$") String password) {
         User u = userService.findByUserName(username);
         if (u == null) {
             return Result.error("用户名不存在");
@@ -57,27 +80,31 @@ public class UserController {
     }
     //查询用户信息
     @GetMapping({"/api/users/info"})
-    private Result<User> userInfo() {
+    public Result userInfo() {
         Map<String, Object> map = ThreadLocalUtil.get();
         String username = (String)map.get("username");
         User user = userService.findByUserName(username);
-        return Result.success(user);
+        return Result.success(JSON.toJSON(user));
     }
     //更新用户信息
     @PutMapping({"/api/users/update"})
-    public Result update(@RequestBody User user) {
-        userService.update(user);
+    public Result update(@RequestParam String email, @RequestParam String nickname) {
+        userService.update(email,nickname);
         return Result.success("已更新用户信息");
     }
     //更新用户头像
-    @PatchMapping({"/api/users/avatar"})
-    public Result updateAvatar(@RequestParam @URL String avatar) {
-        userService.updateAvatar(avatar);
-        return Result.success();
+    @PatchMapping({"/api/users/avatar/{type}/{url}"})
+    public Result updateAvatar(MultipartFile file,@PathVariable String type,@PathVariable String url) throws Exception {
+        String filename = UUID.randomUUID().toString() + '.' + type;
+        String newUrl = AliOssUtil.uploadFile(filename, file.getInputStream());
+        AliOssUtil.deleteFile(url);
+        userService.updateAvatar(newUrl);
+        return Result.success(newUrl);
     }
     //更新用户密码
+    @Valid
     @PutMapping({"/api/users/password/{password}/{newPassword}"})
-    public Result updatePassword(@PathVariable String password,@PathVariable String newPassword,@RequestHeader("Authorization") String token) {
+    public Result updatePassword(@PathVariable @Pattern(regexp = "^[a-zA-Z0-9]{8,32}$") String password,@PathVariable @Pattern(regexp = "^[a-zA-Z0-9]{8,32}$") String newPassword,@RequestHeader("Authorization") String token) {
         Map<String, Object> map = ThreadLocalUtil.get();
         String username = (String)map.get("username");
         User u = userService.findByUserName(username);
@@ -126,6 +153,20 @@ public class UserController {
         }
         return Result.error("用户信息缺失，请重新登录或联系管理员。");
 
+    }
+
+    //验证密码
+    @Valid
+    @GetMapping({"/api/users/verifyPassword/{password}"})
+    public Result verifyPassword(@PathVariable @Pattern(regexp = "^[a-zA-Z0-9]{8,32}$") String password) {
+        Map<String, Object> map = ThreadLocalUtil.get();
+        String username = (String)map.get("username");
+        User user = userService.findByUserName(username);
+        if (user.getPasswordHash().equals(Md5Util.getMD5String(password))) {
+            return Result.success("验证成功");
+        }else {
+            return Result.error("验证失败");
+        }
     }
 
     //更新已用存储空间

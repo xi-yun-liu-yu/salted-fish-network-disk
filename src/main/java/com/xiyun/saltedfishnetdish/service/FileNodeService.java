@@ -14,4 +14,5 @@ public interface FileNodeService {
     FileNode updateNodeParent(String id, String newParentId);
     void deleteNode(String id);
     void deleteNodeRecursively(String id);
+    String getTree(String nodeId);
 }

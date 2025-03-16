@@ -17,6 +17,9 @@ public class FileNode {
     private String id; // 节点ID
     private String name; // 节点名称
     private String type; // 节点类型：file 或 folder
+    private String url; // 节点url
+    private Long size; // 节点文件大小
     private String parentId; // 父节点ID
     private List<String> children; // 子节点ID列表
+//    private java.sql.Timestamp updatedAt;//文件更新时间
 }

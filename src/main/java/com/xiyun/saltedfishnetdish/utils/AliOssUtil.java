@@ -30,7 +30,6 @@ public class AliOssUtil {
     private static final String ENDPOINT = "oss-cn-chengdu.aliyuncs.com";
     private static final String BUCKET_NAME = "sfnd";
 
-
     public AliOssUtil() {
     }
 
@@ -60,6 +59,32 @@ public class AliOssUtil {
         }
 
         return url;
+    }
+
+    public static void deleteFile(String objectName) throws Exception {
+        EnvironmentVariableCredentialsProvider credentialsProvider = CredentialsProviderFactory.newEnvironmentVariableCredentialsProvider();
+        OSS ossClient = (new OSSClientBuilder()).build(ENDPOINT, credentialsProvider);
+        String url = "";
+
+        try {
+//            PutObjectRequest putObjectRequest = new PutObjectRequest(BUCKET_NAME, objectName, in);
+            ossClient.deleteObject(BUCKET_NAME, objectName);
+//            url = "https://sfnd." + ENDPOINT + "/" + objectName;
+        } catch (OSSException oe) {
+            System.out.println("Caught an OSSException, which means your request made it to OSS, but was rejected with an error response for some reason.");
+            System.out.println("Error Message:" + oe.getErrorMessage());
+            System.out.println("Error Code:" + oe.getErrorCode());
+            System.out.println("Request ID:" + oe.getRequestId());
+            System.out.println("Host ID:" + oe.getHostId());
+        } catch (ClientException ce) {
+            System.out.println("Caught an ClientException, which means the client encountered a serious internal problem while trying to communicate with OSS, such as not being able to access the network.");
+            System.out.println("Error Message:" + ce.getMessage());
+        } finally {
+            if (ossClient != null) {
+                ossClient.shutdown();
+            }
+
+        }
     }
 
     public static void downLoad(String objectName, String filePath) throws Exception {

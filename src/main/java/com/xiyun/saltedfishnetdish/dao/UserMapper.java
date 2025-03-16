@@ -17,13 +17,13 @@ public interface UserMapper {
     User findByUserName(String username);
     //更新用户信息
     @Update({"UPDATE user set email=#{email}, nickname=#{nickname} where user_id = #{userId} "})
-    void update(User user);
+    void update(Integer userId,String email,String nickname);
     //更新用户密码
     @Update({"update user set password_hash=#{s} where user_id = #{userId}"})
     void updatePassword(Integer userId, String s);
     //更新用户头像
-    @Update({"update user set avatar_url = #{avatar} where user_id = #{userId}"})
-    void updateAvatar(Integer userId, String avatar);
+    @Update({"update user set avatar_url = #{avatarUrl} where user_id = #{userId}"})
+    void updateAvatar(Integer userId, String avatarUrl);
     //更新用户权限
     @Update({"update user set user_perm_id = #{premId} where user_id = #{userId}"})
     void updatePremId(Integer userId, Integer premId);

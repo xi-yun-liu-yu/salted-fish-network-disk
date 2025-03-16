@@ -29,8 +29,10 @@ public class UserServiceImpl implements UserService {
     }
     //更新用户信息
     @Override
-    public void update(User user) {
-        this.userMapper.update(user);
+    public void update(String email, String nickname) {
+        Map<String, Object> map = ThreadLocalUtil.get();
+        Integer userId = (Integer)map.get("userId");
+        this.userMapper.update(userId,email,nickname);
     }
     //更新用户密码
     @Override
@@ -42,10 +44,10 @@ public class UserServiceImpl implements UserService {
     }
     //更新用户头像
     @Override
-    public void updateAvatar(String avatar) {
+    public void updateAvatar(String avatarUrl) {
         Map<String, Object> map = ThreadLocalUtil.get();
         Integer userId = (Integer)map.get("userId");
-        this.userMapper.updateAvatar(userId, avatar);
+        this.userMapper.updateAvatar(userId, avatarUrl);
     }
     //更新用户权限
     @Override

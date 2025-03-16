@@ -23,6 +23,6 @@ public class requestText {
 
     @Test
     public void downByShareUrl() throws Exception {
-        AliOssUtil.downLoadByUrl("http://eyJjbGFpbXMiOnsidXJsIjoic2ZuZC5vc3MtY24tY2hlbmdkdS5hbGl5dW5jcy5jb20vMjFlNjQ4MDEtODkzZS00YjBmLTllYzAtMDFhOTdjMjBjNDkxLmpwZz9FeHBpcmVzPTE3NDE1OTY1MjYmT1NTQWNjZXNzS2V5SWQ9TFRBSTV0R0xTenVxeGJyWmtabTRRYzRDJlNpZ25hdHVyZT1IbTN4M2NPbDNDQTMlMkJyTnhwakZ5Z3B6UVVxbyUzRCJ9LCJleHAiOjE3NDE2MzYxMjZ9.ToPJdxOTCJGVuM2cIu0y8NFaw4OzZ0XEs1lGsf1w5rg","E:/a.jpg");
+        AliOssUtil.deleteFile("cf163ccb-1b24-47ac-9061-d89d75a334a8.jpg");
     }
 }

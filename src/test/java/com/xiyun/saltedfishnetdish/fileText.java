@@ -16,4 +16,10 @@ public class fileText {
     public void fileAddText() {
         fileNodeService.addNode(new FileNode("rootid","root","folder",null,null));
     }
+    @Test
+    public void getFileNodeTree(){
+        System.out.println(fileNodeService.getTree("1000003"));
+
+    }
 }
+

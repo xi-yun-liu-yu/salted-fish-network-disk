@@ -1,5 +1,7 @@
 package com.xiyun.saltedfishnetdish.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.google.gson.annotations.JsonAdapter;
 import com.xiyun.saltedfishnetdish.pojo.FileNode;
 import com.xiyun.saltedfishnetdish.service.FileNodeService;
 import com.xiyun.saltedfishnetdish.service.FileService;
@@ -11,6 +13,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import javax.swing.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -80,7 +83,7 @@ public class FileNodeServiceImpl implements FileNodeService {
     }
 
     /**
-     * 更新节点名称
+     * 更新节点孩子
      *
      * @param id       节点ID
      * @param children  新子节点
@@ -137,18 +140,26 @@ public class FileNodeServiceImpl implements FileNodeService {
      * @param nodeId 起始节点ID
      * @return 树状结构的根节点
      */
-//    public FileNode getTree(String nodeId) {
-//        FileNode node = getNodeById(nodeId);
-//        if (node != null && "folder".equals(node.getType())) {
-//            // 递归查询子节点
-//            List<FileNode> children = getChildrenByParentId(nodeId);
-//            for (FileNode child : children) {
-//                if ("folder".equals(child.getType())) {
-//                    child.setChildren(List.of(getTree(child.getId()))); // 递归设置子节点
-//                }
-//            }
-//            node.setChildren(children);
-//        }
-//        return node;
-//    }
+    public String getTree(String nodeId) {
+        List<FileNode> treeNodes = getTreeNodes(nodeId);
+        return JSON.toJSONString(treeNodes);
+    }
+
+    private List<FileNode> getTreeNodes(String nodeId) {
+        List<FileNode> nodeArr = new ArrayList<FileNode>();
+        FileNode nodeById = getNodeById(nodeId);
+        nodeArr.add(nodeById);
+        nodeById.getChildren().forEach(node -> {
+            if (node == null) {
+                return;
+            }
+            FileNode temp = getNodeById(node);
+            if (temp.getChildren() == null || temp.getChildren().isEmpty()) {
+                nodeArr.add(temp);
+            }else {
+                nodeArr.addAll(getTreeNodes(node));
+            }
+        });
+        return nodeArr;
+    }
 }
