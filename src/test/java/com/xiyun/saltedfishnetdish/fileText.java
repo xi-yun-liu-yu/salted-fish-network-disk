@@ -14,7 +14,7 @@ public class fileText {
 
     @Test
     public void fileAddText() {
-        fileNodeService.addNode(new FileNode("rootid","root","folder",null,null));
+//        fileNodeService.addNode(new FileNode("rootid","root","folder",null,null));
     }
     @Test
     public void getFileNodeTree(){

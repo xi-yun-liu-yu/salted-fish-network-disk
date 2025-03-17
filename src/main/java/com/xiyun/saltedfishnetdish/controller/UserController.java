@@ -22,10 +22,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Validated
@@ -51,7 +50,12 @@ public class UserController {
         if (u == null) {
             userService.register(username, password);
             Integer userId = userService.findByUserName(username).getUserId();
-            fileNodeService.addNode(new FileNode(String.valueOf(userId),"root","folder",null, 0L,null,null));
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            // 获取当前时间
+            Date now = new Date();
+            // 将时间格式化为指定格式的字符串
+            String timeStr = sdf.format(now);
+            fileNodeService.addNode(new FileNode(String.valueOf(userId),"root","folder",null, 0L,null,null,timeStr));
             return Result.success();
         } else {
             return Result.error("用户名已被占用");

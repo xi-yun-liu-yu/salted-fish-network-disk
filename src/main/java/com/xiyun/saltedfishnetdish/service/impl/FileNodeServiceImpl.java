@@ -1,6 +1,7 @@
 package com.xiyun.saltedfishnetdish.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.gson.annotations.JsonAdapter;
 import com.xiyun.saltedfishnetdish.pojo.FileNode;
 import com.xiyun.saltedfishnetdish.service.FileNodeService;
@@ -143,6 +144,8 @@ public class FileNodeServiceImpl implements FileNodeService {
     public String getTree(String nodeId) {
         List<FileNode> treeNodes = getTreeNodes(nodeId);
         return JSON.toJSONString(treeNodes);
+//        return JSON.toJSONStringWithDateFormat(treeNodes, "yyyy - MM - dd HH:mm:ss", SerializerFeature.WriteDateUseDateFormat);
+
     }
 
     private List<FileNode> getTreeNodes(String nodeId) {

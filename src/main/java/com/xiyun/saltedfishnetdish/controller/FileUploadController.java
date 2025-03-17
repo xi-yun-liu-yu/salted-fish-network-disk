@@ -1,7 +1,6 @@
 package com.xiyun.saltedfishnetdish.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.xiyun.saltedfishnetdish.dao.FileMapper;
 import com.xiyun.saltedfishnetdish.pojo.File;
 import com.xiyun.saltedfishnetdish.pojo.FileNode;
 import com.xiyun.saltedfishnetdish.pojo.Result;
@@ -9,11 +8,9 @@ import com.xiyun.saltedfishnetdish.service.FileNodeService;
 import com.xiyun.saltedfishnetdish.service.FileService;
 import com.xiyun.saltedfishnetdish.service.UserService;
 import com.xiyun.saltedfishnetdish.utils.AliOssUtil;
-
+import java.text.SimpleDateFormat;
 import java.util.*;
-
 import com.xiyun.saltedfishnetdish.utils.ThreadLocalUtil;
-import jakarta.servlet.annotation.HandlesTypes;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -34,8 +31,8 @@ public class FileUploadController {
 
     //上传文件到服务器
     @Transactional
-    @PostMapping({"/api/file/upload/{nodeId}"})
-    public Result<String> upload(MultipartFile file, @PathVariable String nodeId) throws Exception {
+    @PostMapping({"/api/file/upload/{nodeId}/{originalFilename}"})
+    public Result<String> upload(MultipartFile file, @PathVariable String nodeId, @PathVariable String originalFilename) throws Exception {
         String url;
 
         try{
@@ -55,26 +52,33 @@ public class FileUploadController {
                 userService.userStorage(Long.parseLong(storage));
                 stringRedisTemplate.opsForValue().set("userStorage", storage);
             }
-            String originalFilename = file.getOriginalFilename();
+//            String originalFilename = file.getOriginalFilename();
             String filename = UUID.randomUUID().toString() + originalFilename.substring(originalFilename.lastIndexOf("."));
             FileNode nodeById = fileNodeService.getNodeById(nodeId);
+            String fileTypeAfter = StringUtils.substringAfter(file.getContentType(), "/");
+            String fileTypeBefore = StringUtils.substringBefore(file.getContentType(), "/");
             List<String> children = nodeById.getChildren();
-            String fileType = StringUtils.substringAfter(file.getContentType(), "/");
             List<FileNode> childrenByParentId = fileNodeService.getChildrenByParentId(nodeId);
             for(FileNode child : childrenByParentId){
-                if (child.getName().equals(originalFilename) && child.getType().equals(fileType)){
-                    originalFilename = originalFilename + "~";
+                if (child.getName().equals(originalFilename) ){
+                    originalFilename = originalFilename.substring(0,originalFilename.lastIndexOf(".")) + "~" + originalFilename.substring(originalFilename.lastIndexOf("."));
                 }
             }
             children.add(filename);
             fileNodeService.updateNodeChildren(nodeId, children);
 
             url = AliOssUtil.uploadFile(filename, file.getInputStream());
-            fileNodeService.addNode(new FileNode(filename,originalFilename,StringUtils.substringBefore(file.getContentType(), "/"),url,file.getSize(),nodeId,null));
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            // 获取当前时间
+            Date now = new Date();
+            // 将时间格式化为指定格式的字符串
+            String timeStr = sdf.format(now);
+
+            fileNodeService.addNode(new FileNode(filename,originalFilename,fileTypeBefore,url,file.getSize(),nodeId,null,timeStr));
             Map<String, Object> map = ThreadLocalUtil.get();
             String username = (String)map.get("username");
             Integer userId = (Integer)map.get("userId");
-            File file1 = new File(originalFilename,filename, fileType,file.getSize(),0,url,"private",userId,username,null,null);
+            File file1 = new File(originalFilename,filename, fileTypeAfter,file.getSize(),0,url,"private",userId,username,null,null);
             fileService.insertFile(file1);
 
         } catch (Exception e) {
@@ -184,7 +188,12 @@ public class FileUploadController {
             }
             children.add(uuid);
             fileNodeService.updateNodeChildren(nodeId, children);
-            fileNodeService.addNode(new FileNode(uuid,folderName,"folder",null,0L,nodeId,null));
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            // 获取当前时间
+            Date now = new Date();
+            // 将时间格式化为指定格式的字符串
+            String timeStr = sdf.format(now);
+            fileNodeService.addNode(new FileNode(uuid,folderName,"folder",null,0L,nodeId,null,timeStr));
             Map<String, Object> map = ThreadLocalUtil.get();
             String username = (String)map.get("username");
             Integer userId = (Integer)map.get("userId");
