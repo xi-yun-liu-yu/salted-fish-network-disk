@@ -6,6 +6,7 @@ import com.google.gson.annotations.JsonAdapter;
 import com.xiyun.saltedfishnetdish.pojo.FileNode;
 import com.xiyun.saltedfishnetdish.service.FileNodeService;
 import com.xiyun.saltedfishnetdish.service.FileService;
+import com.xiyun.saltedfishnetdish.utils.AliOssUtil;
 import com.xiyun.saltedfishnetdish.utils.MongoDBUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -22,6 +23,8 @@ public class FileNodeServiceImpl implements FileNodeService {
 
     @Autowired
     private MongoDBUtil mongoDBUtil;
+    @Autowired
+    private FileService fileService;
 
     private static final String COLLECTION_NAME = "files";
 
@@ -165,4 +168,20 @@ public class FileNodeServiceImpl implements FileNodeService {
         });
         return nodeArr;
     }
+
+    public void deleteFolder(String folderId) {
+        List<FileNode> fileTree = getTreeNodes(folderId);
+        fileTree.forEach(node -> {
+            fileService.deleteFileById(node.getId());
+            if (!"folder".equals(node.getType())) {
+                try {
+                    AliOssUtil.deleteFile(node.getId());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+    }
+
 }

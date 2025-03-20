@@ -31,8 +31,8 @@ public class FileUploadController {
 
     //上传文件到服务器
     @Transactional
-    @PostMapping({"/api/file/upload/{nodeId}/{originalFilename}"})
-    public Result<String> upload(MultipartFile file, @PathVariable String nodeId, @PathVariable String originalFilename) throws Exception {
+    @PostMapping({"/api/file/upload/{nodeId}/{originalFilename}/{uuid}"})
+    public Result<String> upload(MultipartFile file, @PathVariable String nodeId, @PathVariable String originalFilename,@PathVariable String uuid) throws Exception {
         String url;
 
         try{
@@ -52,8 +52,7 @@ public class FileUploadController {
                 userService.userStorage(Long.parseLong(storage));
                 stringRedisTemplate.opsForValue().set("userStorage", storage);
             }
-//            String originalFilename = file.getOriginalFilename();
-            String filename = UUID.randomUUID().toString() + originalFilename.substring(originalFilename.lastIndexOf("."));
+            String filename = uuid + originalFilename.substring(originalFilename.lastIndexOf("."));
             FileNode nodeById = fileNodeService.getNodeById(nodeId);
             String fileTypeAfter = StringUtils.substringAfter(file.getContentType(), "/");
             String fileTypeBefore = StringUtils.substringBefore(file.getContentType(), "/");
@@ -85,11 +84,11 @@ public class FileUploadController {
             throw new RuntimeException(e);
         }
 
-        return Result.success(url);
+        return Result.success(originalFilename);
     }
     //从服务器下载文件到本地指定地址
-    @GetMapping({"/api/file/downLoad"})
-    public Result downLoad(String fileName,String filePath) throws Exception {
+    @PostMapping({"/api/file/downLoad/{fileName}"})
+    public Result downLoad(@PathVariable String fileName,@RequestParam String filePath) throws Exception {
         AliOssUtil.downLoad(fileName,filePath);
         return Result.success("下载成功");
     }
@@ -203,8 +202,10 @@ public class FileUploadController {
 
             throw new RuntimeException(e);
         }
-        return Result.success("已创建" + folderName);
+        return Result.success(folderName);
     }
+
+    //获取指定文件夹的文件树
     @GetMapping({"/api/file/getFileNodeTree"})
     public Result getFileNodeTree(){
         Map<String, Object> map = ThreadLocalUtil.get();
@@ -213,8 +214,25 @@ public class FileUploadController {
     }
 
     //删除指定文件夹下的树
-    public void deleteFile(){
+    @GetMapping({"/api/file/deleteFolder/{fileUuid}"})
+    public void deleteFolder(@PathVariable String fileUuid){
+        String parentId = fileNodeService.getNodeById(fileUuid).getParentId();
+        FileNode p = fileNodeService.getNodeById(parentId);
+        List<String> pc = p.getChildren();
+        pc.remove(fileUuid);
+        fileNodeService.updateNodeChildren(parentId, pc);
+        fileNodeService.deleteFolder(fileUuid);
+        fileNodeService.deleteNodeRecursively(fileUuid);
+    }
 
+    @GetMapping({"/api/file/hasFolder/{fileUuid}"})
+    public Result hasFolder(@PathVariable String fileUuid){
+        FileNode nodeById = fileNodeService.getNodeById(fileUuid);
+        if(nodeById != null){
+            return Result.success(true);
+        }else {
+            return Result.success(false);
+        }
     }
 }
 

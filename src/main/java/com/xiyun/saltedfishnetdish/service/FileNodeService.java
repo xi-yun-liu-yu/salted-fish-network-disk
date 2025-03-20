@@ -15,4 +15,5 @@ public interface FileNodeService {
     void deleteNode(String id);
     void deleteNodeRecursively(String id);
     String getTree(String nodeId);
+    void deleteFolder(String folderId);
 }
