@@ -165,6 +165,11 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+
+                    <!-- 指定 JAR 包输出目录（相对于构建目录） -->
+                    <outputDirectory>${project.basedir}/custom-jars</outputDirectory>
+                    <!-- 或者绝对路径 -->
+                    <!-- <outputDirectory>/path/to/your/jars</outputDirectory> -->
                 </configuration>
             </plugin>
         </plugins>
