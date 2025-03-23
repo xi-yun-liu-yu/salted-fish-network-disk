@@ -1,6 +1,7 @@
-阿里云OSS
-AccessKey ID LTAI5tGLSzuqxbrZkZm4Qc4C
-AccessKey Secret KEFVMcs9bbs2n0Qyg1AjVpdeiaTNeB
+阿里云OSS 
+自行设定于本机用户环境变量
+OSS_ACCESS_KEY_ID: ${ALIYUN_ACCESS_KEY_ID}
+OSS_ACCESS_KEY_SECRET: ${ALIYUN_ACCESS_KEY_SECRET}
 
 Mysql 8.0.32
 数据库初始化见./docker/mysql/init.sql
