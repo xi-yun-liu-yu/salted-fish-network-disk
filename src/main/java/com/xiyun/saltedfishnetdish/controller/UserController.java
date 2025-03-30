@@ -45,7 +45,7 @@ public class UserController {
     //注册
     @Valid
     @PostMapping({"/api/users/register/{username}/{password}"})
-    public Result register(@PathVariable @Pattern(regexp = "^\\S.{5,20}$") String username, @PathVariable @Pattern(regexp = "^\\S[a-zA-Z0-9]{8,32}$") String password) {
+    public Result register(@PathVariable String username, @PathVariable String password) {
         User u = userService.findByUserName(username);
         if (u == null) {
             userService.register(username, password);
@@ -64,7 +64,7 @@ public class UserController {
     //登录
     @Valid
     @GetMapping({"/api/users/login/{username}/{password}"})
-    public Result<String> login(@PathVariable @Pattern(regexp = "^\\S.{4,20}$") String username, @PathVariable @Pattern(regexp = "^\\S[a-zA-Z0-9]{7,32}$") String password) {
+    public Result<String> login(@PathVariable String username, @PathVariable String password) {
         User u = userService.findByUserName(username);
         if (u == null) {
             return Result.error("用户名不存在");
@@ -173,40 +173,5 @@ public class UserController {
         }
     }
 
-    //更新已用存储空间
-//    @PutMapping({"/api/internal/users/storage/{operation}/{value}"})
-    public Result setStorage( String operation, Long value){
-        String userStorage = stringRedisTemplate.opsForValue().get("userStorage");
-        String userStorageLimit = stringRedisTemplate.opsForValue().get("userStorageLimit");
-        String storage;
-        if (userStorage != null && userStorageLimit != null) {
-            switch (operation) {
-                case "UPLOAD":
-                    if (Long.parseLong(userStorage) + value <= Long.parseLong(userStorageLimit)){
-                        storage = String.valueOf(Long.parseLong(userStorage) + value);
-                    }else {
-                        return Result.error("未使用的空间不足");
-                    }
 
-                    break;
-                case "DELETE":
-                    if (Long.parseLong(userStorage) - value >= 0) {
-                        storage = String.valueOf(Long.parseLong(userStorage) - value);
-                    }else {
-                        return Result.error("非法参数");
-                    }
-                    break;
-                case "SYNC":
-                    storage = String.valueOf(value);
-                    break;
-                default:
-                    return Result.error("非法操作！！！");
-            }
-            userService.userStorage(Long.parseLong(storage));
-            stringRedisTemplate.opsForValue().set("userStorage", storage);
-            return Result.success("内存占有量调整成功！");
-        }
-        return Result.error("用户信息缺失，请重新登录或联系管理员。");
-
-    }
 }

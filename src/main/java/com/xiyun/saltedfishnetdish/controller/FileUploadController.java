@@ -161,6 +161,7 @@ public class FileUploadController {
         if (file1.getViewPermission().equals("private") && userId == file1.getCreatorId()){
             return Result.error("无操作权限");
         }
+        setStorage("DELETE",file1.getFileSize());
         AliOssUtil.deleteFile(fileUuid);
         List<String> children = fileNodeService.getNodeById(parentId).getChildren();
         children.remove(fileUuid);
@@ -168,6 +169,41 @@ public class FileUploadController {
         fileService.deleteFileById(fileUuid);
         fileNodeService.deleteNode(fileUuid);
         return Result.success("删除成功");
+    }
+
+    public Result setStorage(String operation, Long value){
+        String userStorage = stringRedisTemplate.opsForValue().get("userStorage");
+        String userStorageLimit = stringRedisTemplate.opsForValue().get("userStorageLimit");
+        String storage;
+        if (userStorage != null && userStorageLimit != null) {
+            switch (operation) {
+                case "UPLOAD":
+                    if (Long.parseLong(userStorage) + value <= Long.parseLong(userStorageLimit)){
+                        storage = String.valueOf(Long.parseLong(userStorage) + value);
+                    }else {
+                        return Result.error("未使用的空间不足");
+                    }
+
+                    break;
+                case "DELETE":
+                    if (Long.parseLong(userStorage) - value >= 0) {
+                        storage = String.valueOf(Long.parseLong(userStorage) - value);
+                    }else {
+                        return Result.error("非法参数");
+                    }
+                    break;
+                case "SYNC":
+                    storage = String.valueOf(value);
+                    break;
+                default:
+                    return Result.error("非法操作！！！");
+            }
+            userService.userStorage(Long.parseLong(storage));
+            stringRedisTemplate.opsForValue().set("userStorage", storage);
+            return Result.success("内存占有量调整成功！");
+        }
+        return Result.error("用户信息缺失，请重新登录或联系管理员。");
+
     }
 
 
@@ -224,7 +260,7 @@ public class FileUploadController {
         fileNodeService.deleteFolder(fileUuid);
         fileNodeService.deleteNodeRecursively(fileUuid);
     }
-
+    //是否存在该文件夹
     @GetMapping({"/api/file/hasFolder/{fileUuid}"})
     public Result hasFolder(@PathVariable String fileUuid){
         FileNode nodeById = fileNodeService.getNodeById(fileUuid);
